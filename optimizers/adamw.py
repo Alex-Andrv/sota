@@ -44,7 +44,7 @@ class AdamW(Optimizer):
                 if grad.is_sparse:
                     raise RuntimeError('Adam does not support sparse gradients, please consider SparseAdam instead')
 
-                state = self.state[grad]
+                state = self.state[g]
 
                 if len(state) == 0:
                 	state['step'] = 0
