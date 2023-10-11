@@ -102,3 +102,15 @@ class Experiment:
                     params.append(param.detach().cpu().numpy().copy())
                 self.path.append(params)
 
+    def get_metric(self, metric: str, mode="test", n_last: int = None):
+        arr = self.metrics_history[metric + "_" + mode]
+        return arr[-n_last:] if n_last else arr
+
+    def get_loss(self, mode="test", n_last: int = -1):
+        arr = self.test_loss if mode == "test" else self.train_loss
+        return arr[-n_last:] if n_last else arr
+
+    def get_path(self) -> np.ndarray:
+        return np.array(self.path)
+
+
