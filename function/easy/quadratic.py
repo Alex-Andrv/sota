@@ -8,5 +8,5 @@ class Quadratic:
 
 
     def forward(self) -> torch.Tensor:
-        # x^T * A * x - вроде torch умеет трнаспонировать
+        # x^T * A * x
         return self.x.matmul(self.diagonal).matmul(self.x)
