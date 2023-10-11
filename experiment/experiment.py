@@ -1,6 +1,7 @@
-from sklearn.model_selection import train_test_split
-from torch.utils.data import TensorDataset, DataLoader
-from typing import List, Dict, Callable
+import typing
+
+from torch.utils.data import DataLoader
+from typing import Dict, Callable
 from itertools import product
 
 import torch
@@ -12,7 +13,8 @@ print(f'Using device {device}')
 
 class Experiment:
 
-    def __init__(self, model, train_loader: DataLoader, test_loader: DataLoader, optimizer, loss_fn,
+    def __init__(self, model, train_loader: DataLoader, test_loader: DataLoader | None, optimizer,
+                 loss_fn: typing.Callable[[torch.Tensor, torch.Tensor], torch.Tensor] | None,
                  metrics: Dict[str, Callable] = None, store_path=False, name='experiment',
                  mode="classification" # classification, regression or function
                  ):
