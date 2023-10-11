@@ -36,7 +36,7 @@ https://github.com/md-experiments/glue_benchmark
 
 open-source? datasets https://paperswithcode.com/datasets
 
-
+image models
 | model\dataset                                                                                           | [imagenet](https://image-net.org/index.php) | imagenet21 | [v2](https://github.com/modestyachts/ImageNetV2) | [a](https://github.com/hendrycks/natural-adv-examples) | [objectnet](https://objectnet.dev/) | real(benchmark) | [mscoco](https://cocodataset.org/#download) | flickr (in progress) |
 |---------------------------------------------------------------------------------------------------------|---------------------------------------------|------------|--------------------------------------------------|--------------------------------------------------------|-------------------------------------|-----------------|---------------------------------------------|----------------------|
 | image classification                                                                                    |                                             |            |                                                  |                                                        |                                     |                 |                                             |                      |
@@ -50,3 +50,12 @@ open-source? datasets https://paperswithcode.com/datasets
 | image generation                                                                                        |                                             |            |                                                  |                                                        |                                     |                 |                                             |                      |
 | text to image                                                                                           |                                             |            |                                                  |                                                        |                                     |                 |                                             |                      |
 | [imagen](https://github.com/lucidrains/imagen-pytorch)                                                  |                                             |            |                                                  |                                                        |                                     |                 |                                             |                      |
+
+
+text models
+| model\dataset                                    | [glue(benchmark)](https://github.com/md-experiments/glue_benchmark) | [c4](https://www.tensorflow.org/datasets/catalog/c4) |
+|--------------------------------------------------|---------------------------------------------------------------------|------------------------------------------------------|
+| text encoders                                    |                                                                     |                                                      |
+| [bert](https://huggingface.co/bert-base-uncased) |                                                                     |                                                      |
+| text decoders                                    |                                                                     |                                                      |
+| [t5](https://huggingface.co/t5-base)             |                                                                     |                                                      |
