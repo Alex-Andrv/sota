@@ -35,6 +35,11 @@ class Experiment:
         self.train_loader = train_loader
         self.test_loader = test_loader
         self.path = []
+        if self.store_path:
+            params = []
+            for param in self.model.parameters():
+                params.append(param.detach().cpu().numpy().copy())
+            self.path.append(params)
         self.metrics_history = {key + "_" + mode: [] for key, mode in product(metrics.keys(), ["train", "test"])}
         self.train_loss = []
         self.test_loss = []
