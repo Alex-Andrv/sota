@@ -6,7 +6,7 @@ class Bohachevsky:
     def __init__(self, start_point: torch.Tensor):
         self.x = torch.nn.Parameter(start_point)
 
-    def forward(self):
+    def forward(self) -> torch.Tensor:
         term1 = self.x[0] ** 2
         term2 = 2 * self.x[1] ** 2
         term3 = -0.3 * torch.cos(3 * torch.tensor(2 * torch.pi) * self.x[0])
