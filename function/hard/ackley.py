@@ -14,8 +14,8 @@ class Ackley(Function):
         self.dim = len(self.x)
 
     def calculate(self, x: torch.Tensor) -> torch.Tensor:
-        sum_sq_term = -self.a * torch.exp(-self.b * torch.sqrt(torch.mean(x ** 2)))
-        cos_term = -torch.exp(torch.mean(torch.cos(self.c * x)))
+        sum_sq_term = -self.a * torch.exp(-self.b * torch.sqrt(torch.mean(x ** 2, dim=0)))
+        cos_term = -torch.exp(torch.mean(torch.cos(self.c * x), dim=0))
 
         result = self.a + torch.exp(torch.ones(1)) + sum_sq_term + cos_term
 
