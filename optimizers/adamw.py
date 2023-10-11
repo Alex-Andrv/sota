@@ -6,7 +6,7 @@ from torch.optim import Optimizer
 
 class AdamW(Optimizer):
 
-    def __init__(self, params, lr=1e-3, betas=(0.9, 1-1e-3), eps=1e-6, weight_decay=0.0, correct_bias=True):
+    def __init__(self, params, lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2):
         if not 0.0 <= lr:
             raise ValueError(f"Invalid learning rate: {lr}")
         if not 0.0 <= eps:
@@ -22,11 +22,11 @@ class AdamW(Optimizer):
             lr=lr,
             betas=betas,
             eps=eps,
-            weight_decay=weight_decay,
-            correct_bias=correct_bias
+            weight_decay=weight_decay
         )
         super().__init__(params, defaults)
 
+    @torch.no_grad()
     def step(self, closure=None):
         assert len(self.param_groups) == 1
 
@@ -44,14 +44,14 @@ class AdamW(Optimizer):
                 if grad.is_sparse:
                     raise RuntimeError('Adam does not support sparse gradients, please consider SparseAdam instead')
 
-                state = self.state[grad]
+                state = self.state[g]
 
                 if len(state) == 0:
-                	state['step'] = 0
-                	# Exponential moving average of gradient values
-                	state['exp_avg'] = torch.zeros_like(grad.data)
-                	# Exponential moving average of squared gradient values
-                	state['exp_avg_sq'] = torch.zeros_like(grad.data)
+                    state['step'] = 0
+                    # Exponential moving average of gradient values
+                    state['exp_avg'] = torch.zeros_like(grad.data)
+                    # Exponential moving average of squared gradient values
+                    state['exp_avg_sq'] = torch.zeros_like(grad.data)
 
                 exp_avg, exp_avg_sq = state['exp_avg'], state['exp_avg_sq']
                 beta1, beta2 = group['betas']
@@ -65,10 +65,9 @@ class AdamW(Optimizer):
                 denom = exp_avg_sq.sqrt().add_(group['eps'])
 
                 step_size = group['lr']
-                if group['correct_bias']:  # No bias correction for Bert
-                    bias_correction1 = 1.0 - beta1 ** state['step']
-                    bias_correction2 = 1.0 - beta2 ** state['step']
-                    step_size = step_size * math.sqrt(bias_correction2) / bias_correction1
+                bias_correction1 = 1.0 - beta1 ** state['step']
+                bias_correction2 = 1.0 - beta2 ** state['step']
+                step_size = step_size * math.sqrt(bias_correction2) / bias_correction1
 
                 g.data.addcdiv_(-step_size, exp_avg, denom)
 
