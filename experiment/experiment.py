@@ -66,8 +66,6 @@ class Experiment:
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-            if self.lr_scheduler:
-                self.lr_scheduler.step()
 
         if self.mode == "classification":
             y_pred = np.argmax(y_out.detach().cpu().numpy(), axis=1)
@@ -99,6 +97,9 @@ class Experiment:
             self.metrics_history[key].append(np.mean(new_metrics[key]))
 
         (self.test_loss if eval else self.train_loss).append(np.mean(losses))
+
+        if not eval and self.lr_scheduler:
+            self.lr_scheduler.step()
 
     def run(self, epochs=10, verbose=1):
 
