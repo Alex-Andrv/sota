@@ -1,6 +1,7 @@
 import typing
 
 from torch.utils.data import DataLoader
+from torch.optim.lr_scheduler import LRScheduler
 from typing import Dict, Callable
 from itertools import product
 
@@ -17,6 +18,7 @@ class Experiment:
 
     def __init__(self, model, train_loader: DataLoader, test_loader: DataLoader | None, optimizer,
                  loss_fn: typing.Callable[[torch.Tensor, torch.Tensor], torch.Tensor] | None,
+                 lr_scheduler: LRScheduler | None = None,
                  metrics: Dict[str, Callable] = None, store_path=False, name='experiment',
                  mode="classification",  # classification, regression or function
                  wandb_config=None
@@ -34,6 +36,7 @@ class Experiment:
         self.optimizer = optimizer
         self.loss_fn = loss_fn
         self.mode = mode
+        self.lr_scheduler = lr_scheduler
 
         self.train_loader = train_loader
         self.test_loader = test_loader
@@ -63,6 +66,8 @@ class Experiment:
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
+            if self.lr_scheduler:
+                self.lr_scheduler.step()
 
         if self.mode == "classification":
             y_pred = np.argmax(y_out.detach().cpu().numpy(), axis=1)
@@ -101,8 +106,10 @@ class Experiment:
             wandb_run = wandb.init(**self.wandb_config, reinit=True)
 
         for epoch in range(epochs):
+            self.model.train()
             self.run_epoch(eval=False)
 
+            self.model.eval()
             if self.mode != "function":
                 self.run_epoch(eval=True)
 
