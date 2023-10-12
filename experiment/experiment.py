@@ -7,6 +7,8 @@ from itertools import product
 import torch
 import numpy as np
 
+import wandb
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(f'Using device {device}')
 
@@ -16,7 +18,8 @@ class Experiment:
     def __init__(self, model, train_loader: DataLoader, test_loader: DataLoader | None, optimizer,
                  loss_fn: typing.Callable[[torch.Tensor, torch.Tensor], torch.Tensor] | None,
                  metrics: Dict[str, Callable] = None, store_path=False, name='experiment',
-                 mode="classification" # classification, regression or function
+                 mode="classification",  # classification, regression or function
+                 wandb_config=None
                  ):
         self.model = model.to(device)
 
@@ -44,6 +47,8 @@ class Experiment:
         self.train_loss = []
         self.test_loss = []
 
+        self.wandb_config = wandb_config
+
     def _feed_batch(self, X, y, eval=False):
         torch.set_grad_enabled(not eval)
         X, y = X.to(device), y.to(device)
@@ -52,7 +57,7 @@ class Experiment:
         if self.mode != "function":
             loss = self.loss_fn(y_out, y)
         else:
-            loss = y_out # Minimizing the function value
+            loss = y_out  # Minimizing the function value
 
         if not eval:
             self.optimizer.zero_grad()
@@ -91,6 +96,10 @@ class Experiment:
         (self.test_loss if eval else self.train_loss).append(np.mean(losses))
 
     def run(self, epochs=10, verbose=1):
+
+        if self.wandb_config:
+            wandb_run = wandb.init(**self.wandb_config, reinit=True)
+
         for epoch in range(epochs):
             self.run_epoch(eval=False)
 
@@ -99,7 +108,7 @@ class Experiment:
 
             if verbose == 1:
                 print("-" * 50)
-                print(f'Epoch {epoch+1}/{epochs} - train_loss: {self.train_loss[-1]}')
+                print(f'Epoch {epoch + 1}/{epochs} - train_loss: {self.train_loss[-1]}')
                 for key in self.metrics_history.keys():
                     print(f'{key}: {self.metrics_history[key][-1]}')
 
@@ -109,3 +118,27 @@ class Experiment:
                     params.append(param.detach().cpu().numpy().copy())
                 self.path.append(params)
 
+            if self.wandb_config:
+
+                result = {"train_loss": self.train_loss[-1]}
+
+                for key in self.metrics_history.keys():
+                    result[key] = self.metrics_history[key][-1]
+                if self.mode != "function":
+                    result["test_loss"] = self.test_loss[-1]
+
+                wandb_run.log(result, step=epoch)
+
+        if self.wandb_config:
+            wandb_run.finish()
+
+    def get_metric(self, metric: str, mode="test", n_last: int = None):
+        arr = self.metrics_history[metric + "_" + mode]
+        return arr[-n_last:] if n_last else arr
+
+    def get_loss(self, mode="test", n_last: int = -1):
+        arr = self.test_loss if mode == "test" else self.train_loss
+        return arr[-n_last:] if n_last else arr
+
+    def get_path(self) -> np.ndarray:
+        return np.array(self.path)
