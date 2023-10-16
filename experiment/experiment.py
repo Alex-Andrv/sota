@@ -82,15 +82,18 @@ class Experiment:
 
         return loss.item(), metrics
 
-    def run_epoch(self, eval=False):
+    def run_epoch(self, eval=False, verbose=0):
         losses = []
         mode = "_test" if eval else "_train"
 
         new_metrics = {key + mode: [] for key in self.metrics.keys()}
 
-        for X, y in (self.test_loader if eval else self.train_loader):
+        for ind, (X, y) in enumerate(self.test_loader if eval else self.train_loader):
             loss, metrics = self._feed_batch(X, y, eval=eval)
             losses.append(loss)
+
+            if verbose >= 1:
+                print(f"{ind} batch, loss {loss}")
 
             for key in metrics.keys():
                 new_metrics[key].append(metrics[key])
@@ -110,13 +113,13 @@ class Experiment:
 
         for epoch in range(epochs):
             self.model.train()
-            self.run_epoch(eval=False)
+            self.run_epoch(eval=False, verbose=verbose-1)
 
             self.model.eval()
             if self.mode != "function":
-                self.run_epoch(eval=True)
+                self.run_epoch(eval=True, verbose=verbose-1)
 
-            if verbose == 1:
+            if verbose >= 1:
                 print("-" * 50)
                 print(f'Epoch {epoch + 1}/{epochs} - train_loss: {self.train_loss[-1]}')
                 for key in self.metrics_history.keys():
