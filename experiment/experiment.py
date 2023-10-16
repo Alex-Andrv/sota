@@ -10,7 +10,7 @@ import numpy as np
 
 import wandb
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f'Using device {device}')
 
 
@@ -21,6 +21,7 @@ class Experiment:
                  lr_scheduler: LRScheduler | None = None,
                  metrics: Dict[str, Callable] = None, store_path=False, name='experiment',
                  mode="classification",  # classification, regression or function
+                 stop_condition: Callable = None,
                  wandb_config=None
                  ):
         self.model = model.to(device)
@@ -37,6 +38,7 @@ class Experiment:
         self.loss_fn = loss_fn
         self.mode = mode
         self.lr_scheduler = lr_scheduler
+        self.stop_condition = stop_condition
 
         self.train_loader = train_loader
         self.test_loader = test_loader
@@ -126,16 +128,19 @@ class Experiment:
                     params.append(param.detach().cpu().numpy().copy())
                 self.path.append(params)
 
+            result = {"train_loss": self.train_loss[-1]}
+            for key in self.metrics_history.keys():
+                result[key] = self.metrics_history[key][-1]
+            if self.mode != "function":
+                result["test_loss"] = self.test_loss[-1]
+
             if self.wandb_config:
-
-                result = {"train_loss": self.train_loss[-1]}
-
-                for key in self.metrics_history.keys():
-                    result[key] = self.metrics_history[key][-1]
-                if self.mode != "function":
-                    result["test_loss"] = self.test_loss[-1]
-
                 wandb_run.log(result, step=epoch)
+
+            if self.stop_condition and self.stop_condition(**result):
+                if verbose == 1:
+                    print("Stopping condition met, stopping training")
+                break
 
         if self.wandb_config:
             wandb_run.finish()
