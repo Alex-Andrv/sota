@@ -1,6 +1,6 @@
 # SOTA (State-of-the-Art) Optimizers Repository
 
-This repository contains the implementation of the Lion optimizer, along with other optimizers for comparison. The primary purpose is to replicate the results from the research paper on the creation of the Lion optimizer titled "Lion: A Novel Method for Stochastic Optimization" by [Author Name et al.](https://arxiv.org/pdf/2302.06675v4.pdf).
+This repository contains the implementation of the Lion optimizer, along with other optimizers for comparison. The primary purpose is to replicate the results from the research paper on the creation of the Lion optimizer titled [Lion: A Novel Method for Stochastic Optimization](https://arxiv.org/pdf/2302.06675v4.pdf).
 
 ## Optimizers
 All the optimizers can be found in the `optimizers` directory. You can explore and compare different optimizers in tasks related to neural network training or finding the minimum of a function with subsequent path visualization.
@@ -24,13 +24,3 @@ The main component of this repository is the `experiment` class, implemented in 
 
 ### Torch
 It is important to note that all the code in this repository is written using the Torch framework.
-
-## Citation
-If you find this repository useful in your research, please consider citing the original paper:
-
-[Author Name et al. "Lion: A Novel Method for Stochastic Optimization."](https://arxiv.org/pdf/2302.06675v4.pdf)
-
-Feel free to contribute to this repository by providing improvements, bug fixes, or additional features. Open issues are actively monitored, and pull requests are welcome.
-
-## License
-This project is licensed under the [MIT License](https://github.com/Alex-Andrv/sota/blob/main/LICENSE).
